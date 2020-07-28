@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="textSizeTitle">18sp</dimen>
+    <dimen name="textSizeSubtitle">12sp</dimen>
+    <dimen name="fabMargin">16dp</dimen>
+</resources>

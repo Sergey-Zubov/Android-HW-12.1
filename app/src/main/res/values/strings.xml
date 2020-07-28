@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Android-HW-12.1</string>
+    <string name="main_activity_name">External storage</string>
+    <string name="btn_delete">Delete</string>
+    <string name="text_view_title">Hello</string>
+    <string name="text_view_subtitle">It\'s me</string>
+    <string name="toast_title">Title: </string>
+    <string name="toast_subtitle">Subtitle: </string>
+    <string name="delete_description">Delete</string>
+    <string name="some_icon">Some icon</string>
+</resources>
