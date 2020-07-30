@@ -8,4 +8,7 @@
     <string name="toast_subtitle">Subtitle: </string>
     <string name="delete_description">Delete</string>
     <string name="some_icon">Some icon</string>
+    <string name="toast_app_need_write_permission">
+        Для дальнейшей работы приложению необходимо разрешение
+        на запись во внешнее хранилище данных!</string>
 </resources>

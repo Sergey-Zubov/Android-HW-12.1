@@ -16,18 +16,8 @@ import java.util.List;
 
 public class ItemsDataAdapter extends BaseAdapter {
 
-    private static final String LOG_TAG = "My app";
     private List<ItemData> mItems;
     private LayoutInflater mInflater;
-
-    public File getPrivateAlbumStorageDir(Context context, String albumName) {
-        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), albumName);
-        if (!file.mkdirs()) {
-            Log.e(LOG_TAG,"Directory not created");
-        }
-        return file;
-    }
-
 
     ItemsDataAdapter(Context context, List<ItemData> items) {
         if (items == null) {
