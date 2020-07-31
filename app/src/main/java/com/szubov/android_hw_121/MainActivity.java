@@ -1,5 +1,6 @@
 package com.szubov.android_hw_121;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -26,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,11 +52,15 @@ public class MainActivity extends AppCompatActivity {
         int permissionStatus = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            generateRandomData();
+            if (!Objects.requireNonNull(getApplicationContext().getExternalFilesDir(null)).getPath().contains("Items.txt")) {
+                Log.e(LOG_TAG,"Directory not created");
+                addList();
+            }
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
+
         }
 
         FloatingActionButton mFab = findViewById(R.id.fab);
@@ -79,34 +85,28 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResult) {
-        switch (requestCode) {
-            case REQUEST_CODE_PERMISSION_WRITE_STORAGE:
-                if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-                    generateRandomData();
-                } else {
-                    Toast.makeText(this, R.string.toast_app_need_write_permission,
-                            Toast.LENGTH_LONG).show();
-                    finish();
-                }
-                break;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                addList();
+            } else {
+                Toast.makeText(this, R.string.toast_app_need_write_permission,
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
         }
     }
 
-    /*private void toDo() {
+    private void addList() {
         if (isExternalStorageWritable()) {
-            mListSamples = new File(getPrivateAlbumStorageDir(this, "Files"),
-                    "listSamples.txt");
+            mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
+        } else {
+            Log.e(LOG_TAG, "External storage not available");
+            Toast.makeText(this,"Внешнее хранилище не доступно!", Toast.LENGTH_LONG).show();
         }
-    }*/
-
-    /*private File getPrivateAlbumStorageDir(Context context) {
-        File file = new File(getApplicationContext().getExternalFilesDir(null));
-        if (!file.mkdirs()) {
-            Log.e(LOG_TAG,"Directory not created");
-        }
-        return file;
-    }*/
+    }
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -117,14 +117,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generateRandomData() {
-        if (isExternalStorageWritable()) {
-            mListSamples = new File(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "listSamples.txt");
-        }
 
         FileWriter mItemWriter = null;
 
         try {
             mItemWriter = new FileWriter(mListSamples, true);
+
             mItemWriter.append(String.valueOf(mRandom.nextInt(mImages.size()))).
                     append(",").append(getString(R.string.text_view_title)).
                     append(String.valueOf(mAdapter.getCount())).append(",").
@@ -133,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } finally {
             try {
+                assert mItemWriter != null;
                 mItemWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -152,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } finally {
             try {
+                assert mItemReader != null;
                 mItemReader.close();
             } catch (IOException e) {
                 e.printStackTrace();
