@@ -1,5 +1,6 @@
 package com.szubov.android_hw_121;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
             if (!Objects.requireNonNull(getApplicationContext().getExternalFilesDir(null)).getPath().contains("Items.txt")) {
                 Log.e(LOG_TAG,"Directory not created");
-                addList();
+                addDirectory();
             }
         } else {
             ActivityCompat.requestPermissions(this,
@@ -69,12 +70,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 generateRandomData();
+                readItemsList();
+                mAdapter.notifyDataSetChanged();
             }
         });
 
         ListView mListView = findViewById(R.id.listView);
         mAdapter = new ItemsDataAdapter(this, null);
         mListView.setAdapter(mAdapter);
+        readItemsList();
 
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                addList();
+                addDirectory();
             } else {
                 Toast.makeText(this, R.string.toast_app_need_write_permission,
                         Toast.LENGTH_LONG).show();
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addList() {
+    private void addDirectory() {
         if (isExternalStorageWritable()) {
             mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
         } else {
@@ -122,42 +126,58 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             mItemWriter = new FileWriter(mListSamples, true);
-
-            mItemWriter.append(String.valueOf(mRandom.nextInt(mImages.size()))).
+            mItemWriter.append(mRandom.nextInt(mImages.size()) + "," +
+                            getString(R.string.text_view_title) + mAdapter.getCount() + "," +
+                            getString(R.string.text_view_subtitle) + ";");
+            /*ItemData itemData = new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
+                    getString(R.string.text_view_title) + mAdapter.getCount(),
+                    getString(R.string.text_view_subtitle));
+            mAdapter.addItem(itemData);
+            mItemWriter = new FileWriter(mListSamples, true);
+            mItemWriter.append(itemData.getImage()).append(",").
+                    append(itemData.getTitle()).append(String.valueOf(mAdapter.getCount())).
+                    append(",").append(itemData.getSubtitle()).append(";");*/
+            /*mItemWriter.append(mAdapter.addItem(new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
+                    getString(R.string.text_view_title) + mAdapter.getCount(),
+                    getString(R.string.text_view_subtitle))));*/
+            /*mItemWriter.append(String.valueOf(mRandom.nextInt(mImages.size()))).
                     append(",").append(getString(R.string.text_view_title)).
                     append(String.valueOf(mAdapter.getCount())).append(",").
-                    append(getString(R.string.text_view_subtitle)).append(";");
+                    append(getString(R.string.text_view_subtitle)).append(";");*/
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                assert mItemWriter != null;
                 mItemWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
 
+    private void readItemsList() {
         FileReader mItemReader = null;
 
-        try {
-            mItemReader = new FileReader(mListSamples);
-            String[] items = mItemReader.toString().split(";");
-            for (String item : items) {
-                String[] strings = item.split(",");
-                mAdapter.addItem(new ItemData(mImages.get(Integer.parseInt(strings[0])), strings[1], strings[2]));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        if (mListSamples != null && mListSamples.length() > 0) {
             try {
-                assert mItemReader != null;
-                mItemReader.close();
+                mItemReader = new FileReader(mListSamples);
+                String[] items = mItemReader.toString().split(";");
+                for (String item : items) {
+                    String[] strings = item.split(",");
+                    mAdapter.addItem(new ItemData(mImages.get(Integer.parseInt(strings[0])), strings[1], strings[2]));
+
+                }
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    assert mItemReader != null;
+                    mItemReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-
     }
 
     private void showItemData(int position) {

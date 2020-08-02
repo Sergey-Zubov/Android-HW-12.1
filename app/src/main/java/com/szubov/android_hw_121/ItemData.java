@@ -26,4 +26,8 @@ public class ItemData {
         return mSubtitle;
     }
 
+    @Override
+    public String toString() {
+        return mImage + mTitle + mSubtitle;
+    }
 }

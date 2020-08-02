@@ -1,7 +1,6 @@
 package com.szubov.android_hw_121;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,8 +72,7 @@ public class ItemsDataAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
             Log.d("ItemsDataAdapter", "ItemsDataAdapter -> imageDelete -> OnClick");
-                mItems.remove(position);
-            notifyDataSetChanged();
+            removeItem(position);
             }
         });
 
@@ -86,6 +82,5 @@ public class ItemsDataAdapter extends BaseAdapter {
 
         return view;
     }
-
 
 }
