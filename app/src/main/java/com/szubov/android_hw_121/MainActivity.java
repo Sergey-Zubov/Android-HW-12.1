@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     //private static final String LOG_TAG = "My app";
     //private File mListSamples;
     private ExternalFile externalFile;
-    //public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
+    public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,30 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
 
         fillImages();
+
+        int permissionStatus = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            if (externalFile.isExternalStorageWritable()) {
+                mListSamples = new File(mActivity.getApplicationContext().getExternalFilesDir(null), "Items.txt");
+            } else {
+                Log.e(LOG_TAG, "External storage not available");
+                Toast.makeText(mActivity, R.string.external_storage_not_available, Toast.LENGTH_LONG).show();
+            }
+
+            //externalFile.addDirectory();
+            /*if (!mActivity.getApplicationContext().
+                    getExternalFilesDir(null).getPath().contains("Items.txt")) {
+                Log.e(LOG_TAG,"Directory not created");
+                addDirectory();
+            }*/
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_CODE_PERMISSION_WRITE_STORAGE);
+
+        }
 
         /*int permissionStatus = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -75,10 +99,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ListView mListView = findViewById(R.id.listView);
-        if (getExternalFilesDir(null).getPath().contains("Items.txt")) {
-            mAdapter = new ItemsDataAdapter(this, externalFile.loadItemsFromFile(mImages));
-        } else {
-            mAdapter = new ItemsDataAdapter(this, null);
+        try {
+            File fileDir = new File(this.getExternalFilesDir(null), "Items.txt");
+            if (fileDir.exists()) {
+                mAdapter = new ItemsDataAdapter(this, externalFile.loadItemsFromFile(mImages));
+            } else {
+                mAdapter = new ItemsDataAdapter(this, null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         mListView.setAdapter(mAdapter);
@@ -95,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == ExternalFile.REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
+        if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 externalFile.addDirectory();
             } else {

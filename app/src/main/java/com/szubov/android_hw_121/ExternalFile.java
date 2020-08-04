@@ -21,28 +21,29 @@ public class ExternalFile {
 
     private Activity mActivity;
     private File mListSamples;
-    public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
+    //public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
     private static final String LOG_TAG = "My app";
 
 
     public ExternalFile(Activity mActivity) {
         this.mActivity = mActivity;
 
-        int permissionStatus = ContextCompat.checkSelfPermission(mActivity,
+        /*int permissionStatus = ContextCompat.checkSelfPermission(mActivity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            if (!mActivity.getApplicationContext().
+            addDirectory();
+            *//*if (!mActivity.getApplicationContext().
                     getExternalFilesDir(null).getPath().contains("Items.txt")) {
                 Log.e(LOG_TAG,"Directory not created");
                 addDirectory();
-            }
+            }*//*
         } else {
             ActivityCompat.requestPermissions(mActivity,
                     new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
 
-        }
+        }*/
     }
 
     public void saveItemsToFile(ItemData itemData) {
@@ -111,14 +112,14 @@ public class ExternalFile {
 
     }
 
-    public void addDirectory() {
+    /*public void addDirectory() {
         if (isExternalStorageWritable()) {
             mListSamples = new File(mActivity.getApplicationContext().getExternalFilesDir(null), "Items.txt");
         } else {
             Log.e(LOG_TAG, "External storage not available");
             Toast.makeText(mActivity, R.string.external_storage_not_available, Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
