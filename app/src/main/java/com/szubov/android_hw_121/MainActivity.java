@@ -36,9 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private Random mRandom = new Random();
     private ItemsDataAdapter mAdapter;
     private List<Drawable> mImages = new ArrayList<>();
-    private static final String LOG_TAG = "My app";
-    private File mListSamples;
-    public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
+    //private static final String LOG_TAG = "My app";
+    //private File mListSamples;
+    private ExternalFile externalFile;
+    //public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         fillImages();
 
-        int permissionStatus = ContextCompat.checkSelfPermission(this,
+        /*int permissionStatus = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
             if (!Objects.requireNonNull(getApplicationContext().getExternalFilesDir(null)).getPath().contains("Items.txt")) {
@@ -62,23 +63,25 @@ public class MainActivity extends AppCompatActivity {
                     new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
 
-        }
+        }*/
 
         FloatingActionButton mFab = findViewById(R.id.fab);
 
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                generateRandomData();
-                readItemsList();
-                mAdapter.notifyDataSetChanged();
+                mAdapter.addItem(generateRandomData());
             }
         });
 
         ListView mListView = findViewById(R.id.listView);
-        mAdapter = new ItemsDataAdapter(this, null);
+        if (getExternalFilesDir(null).getPath().contains("Items.txt")) {
+            mAdapter = new ItemsDataAdapter(this, externalFile.loadItemsFromFile(mImages));
+        } else {
+            mAdapter = new ItemsDataAdapter(this, null);
+        }
+
         mListView.setAdapter(mAdapter);
-        readItemsList();
 
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -92,9 +95,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
+        if (requestCode == ExternalFile.REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                addDirectory();
+                externalFile.addDirectory();
             } else {
                 Toast.makeText(this, R.string.toast_app_need_write_permission,
                         Toast.LENGTH_LONG).show();
@@ -103,47 +106,51 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addDirectory() {
+    /*private void addDirectory() {
         if (isExternalStorageWritable()) {
             mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
         } else {
             Log.e(LOG_TAG, "External storage not available");
-            Toast.makeText(this,"Внешнее хранилище не доступно!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.external_storage_not_available, Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
-    public boolean isExternalStorageWritable() {
+    /*public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
         }
         return false;
-    }
+    }*/
 
-    private void generateRandomData() {
+    private ItemData generateRandomData() {
 
-        FileWriter mItemWriter = null;
+        return new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
+                getString(R.string.text_view_title) + mAdapter.getCount(),
+                getString(R.string.text_view_subtitle));
+
+        /*FileWriter mItemWriter = null;
 
         try {
             mItemWriter = new FileWriter(mListSamples, true);
             mItemWriter.append(mRandom.nextInt(mImages.size()) + "," +
                             getString(R.string.text_view_title) + mAdapter.getCount() + "," +
                             getString(R.string.text_view_subtitle) + ";");
-            /*ItemData itemData = new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
+            *//*ItemData itemData = new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
                     getString(R.string.text_view_title) + mAdapter.getCount(),
                     getString(R.string.text_view_subtitle));
             mAdapter.addItem(itemData);
             mItemWriter = new FileWriter(mListSamples, true);
             mItemWriter.append(itemData.getImage()).append(",").
                     append(itemData.getTitle()).append(String.valueOf(mAdapter.getCount())).
-                    append(",").append(itemData.getSubtitle()).append(";");*/
-            /*mItemWriter.append(mAdapter.addItem(new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
+                    append(",").append(itemData.getSubtitle()).append(";");*//*
+            *//*mItemWriter.append(mAdapter.addItem(new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
                     getString(R.string.text_view_title) + mAdapter.getCount(),
-                    getString(R.string.text_view_subtitle))));*/
-            /*mItemWriter.append(String.valueOf(mRandom.nextInt(mImages.size()))).
+                    getString(R.string.text_view_subtitle))));*//*
+            *//*mItemWriter.append(String.valueOf(mRandom.nextInt(mImages.size()))).
                     append(",").append(getString(R.string.text_view_title)).
                     append(String.valueOf(mAdapter.getCount())).append(",").
-                    append(getString(R.string.text_view_subtitle)).append(";");*/
+                    append(getString(R.string.text_view_subtitle)).append(";");*//*
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -152,10 +159,10 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
-    private void readItemsList() {
+    /*private void readItemsList() {
         FileReader mItemReader = null;
 
         if (mListSamples != null && mListSamples.length() > 0) {
@@ -178,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-    }
+    }*/
 
     private void showItemData(int position) {
         ItemData itemData = mAdapter.getItem(position);

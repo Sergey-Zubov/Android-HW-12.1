@@ -15,6 +15,7 @@ public class ItemsDataAdapter extends BaseAdapter {
 
     private List<ItemData> mItems;
     private LayoutInflater mInflater;
+    private ExternalFile externalFile = null;
 
     ItemsDataAdapter(Context context, List<ItemData> items) {
         if (items == null) {
@@ -27,11 +28,13 @@ public class ItemsDataAdapter extends BaseAdapter {
 
     void addItem(ItemData item) {
         this.mItems.add(item);
+        externalFile.saveItemsToFile(item);
         notifyDataSetChanged();
     }
 
     void removeItem(int position) {
         mItems.remove(position);
+        externalFile.removeItemFromFile(position);
         notifyDataSetChanged();
     }
 

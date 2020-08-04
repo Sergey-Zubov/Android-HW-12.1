@@ -11,4 +11,5 @@
     <string name="toast_app_need_write_permission">
         Для дальнейшей работы приложению необходимо разрешение
         на запись во внешнее хранилище данных!</string>
+    <string name="external_storage_not_available">Внешнее хранилище не доступно!</string>
 </resources>
