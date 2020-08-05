@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class ItemsDataAdapter extends BaseAdapter {
 
     private List<ItemData> mItems;
     private LayoutInflater mInflater;
-    private ExternalFile externalFile = null;
+    private ExternalFile mExternalFile;
 
     ItemsDataAdapter(Context context, List<ItemData> items) {
         if (items == null) {
@@ -28,13 +30,11 @@ public class ItemsDataAdapter extends BaseAdapter {
 
     void addItem(ItemData item) {
         this.mItems.add(item);
-        externalFile.saveItemsToFile(item);
         notifyDataSetChanged();
     }
 
     void removeItem(int position) {
         mItems.remove(position);
-        externalFile.removeItemFromFile(position);
         notifyDataSetChanged();
     }
 
@@ -64,7 +64,7 @@ public class ItemsDataAdapter extends BaseAdapter {
             view = mInflater.inflate(R.layout.item_list_view, parent,false);
         }
 
-        ItemData itemData = mItems.get(position);
+        final ItemData itemData = mItems.get(position);
 
         ImageView image = view.findViewById(R.id.icon);
         TextView title = view.findViewById(R.id.title);
@@ -76,6 +76,7 @@ public class ItemsDataAdapter extends BaseAdapter {
             public void onClick(View v) {
             Log.d("ItemsDataAdapter", "ItemsDataAdapter -> imageDelete -> OnClick");
             removeItem(position);
+            mExternalFile.removeItemFromFile(mItems);
             }
         });
 

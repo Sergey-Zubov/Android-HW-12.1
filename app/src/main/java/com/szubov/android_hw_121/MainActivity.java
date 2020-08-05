@@ -1,17 +1,12 @@
 package com.szubov.android_hw_121;
 
-import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,14 +16,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,9 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private Random mRandom = new Random();
     private ItemsDataAdapter mAdapter;
     private List<Drawable> mImages = new ArrayList<>();
-    //private static final String LOG_TAG = "My app";
-    //private File mListSamples;
-    private ExternalFile externalFile;
+    private static final String LOG_TAG = "My app";
+    private File mListSamples;
     public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
 
     @Override
@@ -54,26 +43,24 @@ public class MainActivity extends AppCompatActivity {
         int permissionStatus = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            if (externalFile.isExternalStorageWritable()) {
-                mListSamples = new File(mActivity.getApplicationContext().getExternalFilesDir(null), "Items.txt");
-            } else {
-                Log.e(LOG_TAG, "External storage not available");
-                Toast.makeText(mActivity, R.string.external_storage_not_available, Toast.LENGTH_LONG).show();
-            }
-
+        if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_CODE_PERMISSION_WRITE_STORAGE);
+        }
+        /*    mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
             //externalFile.addDirectory();
-            /*if (!mActivity.getApplicationContext().
+            *//*if (!mActivity.getApplicationContext().
                     getExternalFilesDir(null).getPath().contains("Items.txt")) {
                 Log.e(LOG_TAG,"Directory not created");
                 addDirectory();
-            }*/
+            }*//*
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
 
-        }
+        }*/
 
         /*int permissionStatus = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -94,15 +81,15 @@ public class MainActivity extends AppCompatActivity {
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAdapter.addItem(generateRandomData());
+                mAdapter.addItem(generateRandomData(), mListSamples);
             }
         });
 
         ListView mListView = findViewById(R.id.listView);
         try {
             File fileDir = new File(this.getExternalFilesDir(null), "Items.txt");
-            if (fileDir.exists()) {
-                mAdapter = new ItemsDataAdapter(this, externalFile.loadItemsFromFile(mImages));
+            if (fileDir.exists() && fileDir.getAbsolutePath().contains("Items.txt")) {
+                mAdapter = new ItemsDataAdapter(this, ExternalFile.loadItemsFromFile(mImages, mListSamples));
             } else {
                 mAdapter = new ItemsDataAdapter(this, null);
             }
@@ -126,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                externalFile.addDirectory();
+                mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
             } else {
                 Toast.makeText(this, R.string.toast_app_need_write_permission,
                         Toast.LENGTH_LONG).show();
@@ -154,9 +141,11 @@ public class MainActivity extends AppCompatActivity {
 
     private ItemData generateRandomData() {
 
-        return new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
+        ItemData itemData = new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
                 getString(R.string.text_view_title) + mAdapter.getCount(),
                 getString(R.string.text_view_subtitle));
+        //ExternalFile.saveItemsToFile(itemData, mListSamples);
+        return itemData;
 
         /*FileWriter mItemWriter = null;
 
@@ -215,6 +204,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }*/
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
 
     private void showItemData(int position) {
         ItemData itemData = mAdapter.getItem(position);
