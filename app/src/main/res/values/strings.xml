@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Android-HW-12.1</string>
     <string name="main_activity_name">Внешнее хранилище</string>
-    <string name="text_view_title">Привет,</string>
+    <string name="text_view_title">Привет-</string>
     <string name="text_view_subtitle">Это я!</string>
     <string name="toast_title">Title: </string>
     <string name="toast_subtitle">Subtitle: </string>
