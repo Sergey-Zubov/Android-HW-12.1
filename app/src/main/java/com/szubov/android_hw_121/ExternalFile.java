@@ -24,7 +24,8 @@ public class ExternalFile {
         this.mFileName = mFileName;
     }
 
-    public void saveItemsToFile(ItemData itemData, int index) {
+    public void saveItemToFile(ItemData itemData, int index) {
+        Log.d(LOG_TAG, "ExternalFile -> saveItemToFile");
         if (isExternalStorageWritable()) {
             try {
                 File file = new File(mActivity.getExternalFilesDir(null),mFileName);
@@ -41,6 +42,7 @@ public class ExternalFile {
     }
 
     public List<String> loadItemsFromFile() {
+        Log.d(LOG_TAG, "ItemsDataAdapter -> loadItemsFromFile");
         List<String> list = new ArrayList<>();
 
         if (isExternalStorageWritable()) {
@@ -56,15 +58,21 @@ public class ExternalFile {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+            } else {
+                Log.e(LOG_TAG, "File is empty");
             }
+        } else {
+            Log.e(LOG_TAG, "External storage not available");
         }
         return list;
     }
 
     public void removeItemFromFile(ItemData itemData) {
+        Log.d(LOG_TAG, "ItemsDataAdapter -> removeItemFromFile");
         if (isExternalStorageWritable()) {
             File file = new File(mActivity.getExternalFilesDir(null), mFileName);
             List<String> list = new ArrayList<>();
+            Log.d(LOG_TAG, "ItemsDataAdapter -> removeItemFromFile -> read file");
             try {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String oldString;
@@ -74,15 +82,11 @@ public class ExternalFile {
                     }
                 }
                 br.close();
-                /*FileWriter writer = new FileWriter(mFileName,false);
-                writer.write(sb.toString());
-
-                writer.flush();
-                writer.close();*/
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
+            Log.d(LOG_TAG, "ItemsDataAdapter -> removeItemFromFile -> write file");
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file, false));
                 for (String string :list) {
@@ -100,9 +104,6 @@ public class ExternalFile {
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 }

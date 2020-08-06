@@ -9,6 +9,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private ExternalFile mExternalFile = null;
     private List<Drawable> mImages = new ArrayList<>();
     public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
+    private static final String LOG_TAG = "My app";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +47,6 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
         }
 
-        FloatingActionButton mFab = findViewById(R.id.fab);
-
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int indexOfImage = mRandom.nextInt(mImages.size());
-                ItemData itemData = generateRandomData(indexOfImage);
-                mAdapter.addItem(itemData);
-                mExternalFile.saveItemsToFile(itemData, indexOfImage);
-            }
-        });
-
         ListView mListView = findViewById(R.id.listView);
         mExternalFile = new ExternalFile(MainActivity.this, "Items.txt");
         mAdapter = new ItemsDataAdapter(this, null, mExternalFile);
@@ -65,9 +55,23 @@ public class MainActivity extends AppCompatActivity {
 
         loadItems();
 
+        FloatingActionButton mFab = findViewById(R.id.fab);
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(LOG_TAG, "MainActivity -> FloatingActionButton -> onClick");
+                int indexOfImage = mRandom.nextInt(mImages.size());
+                ItemData itemData = generateRandomData(indexOfImage);
+                mAdapter.addItem(itemData);
+                mExternalFile.saveItemToFile(itemData, indexOfImage);
+            }
+        });
+
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(LOG_TAG, "MainActivity -> mListView -> onItemLongClick");
                 showItemData(position);
                 return true;
             }
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d(LOG_TAG, "MainActivity -> onRequestPermissionsResults");
         if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, R.string.toast_app_need_write_permission,
@@ -87,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadItems() {
+        Log.d(LOG_TAG, "MainActivity -> loadItems");
         List<String> list = mExternalFile.loadItemsFromFile();
         if (list != null) {
             for (String item : list) {
@@ -97,12 +103,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ItemData generateRandomData(int index) {
+        Log.d(LOG_TAG, "MainActivity -> generateRandomData");
         return new ItemData(mImages.get(index),
-                getString(R.string.text_view_title) + mAdapter.getCount(),
+                getString(R.string.text_view_title) + generateRandomString(),
                 getString(R.string.text_view_subtitle));
     }
 
     private void showItemData(int position) {
+        Log.d(LOG_TAG, "MainActivity -> showItemData");
         ItemData itemData = mAdapter.getItem(position);
         Toast.makeText(MainActivity.this,getString(R.string.toast_title) +
                 itemData.getTitle() + "\n" + getString(R.string.toast_subtitle) +
@@ -110,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fillImages() {
+        Log.d(LOG_TAG, "MainActivity -> fillImages");
         mImages.add(ContextCompat.getDrawable(MainActivity.this,
                 android.R.drawable.ic_menu_compass));
         mImages.add(ContextCompat.getDrawable(MainActivity.this,
@@ -120,5 +129,17 @@ public class MainActivity extends AppCompatActivity {
                 android.R.drawable.ic_menu_camera));
         mImages.add(ContextCompat.getDrawable(MainActivity.this,
                 android.R.drawable.ic_menu_call));
+    }
+
+    private String generateRandomString() {
+        Log.d(LOG_TAG, "MainActivity -> generateRandomString");
+        StringBuilder sb = new StringBuilder(10);
+        char randomChar;
+        for(int i = 0; i < 10; i++ ) {
+            int randomInt = mRandom.nextInt(25) + 65;
+            randomChar = (char) randomInt;
+            sb.append(randomChar);
+        }
+        return sb.toString();
     }
 }

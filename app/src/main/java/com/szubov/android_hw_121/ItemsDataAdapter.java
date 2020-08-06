@@ -16,6 +16,7 @@ public class ItemsDataAdapter extends BaseAdapter {
     private List<ItemData> mItems;
     private LayoutInflater mInflater;
     private ExternalFile mExternalFile;
+    private static final String LOG_TAG = "My app";
 
     ItemsDataAdapter(Context context, List<ItemData> items, ExternalFile mExternalFile) {
         this.mExternalFile = mExternalFile;
@@ -29,11 +30,13 @@ public class ItemsDataAdapter extends BaseAdapter {
     }
 
     void addItem(ItemData item) {
+        Log.d(LOG_TAG, "ItemsDataAdapter -> addItem");
         this.mItems.add(item);
         notifyDataSetChanged();
     }
 
     void removeItem(int position) {
+        Log.d(LOG_TAG, "ItemsDataAdapter -> removeItem");
         mItems.remove(position);
         notifyDataSetChanged();
     }
@@ -59,6 +62,7 @@ public class ItemsDataAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
+        Log.d(LOG_TAG, "ItemsDataAdapter -> getView");
         View view = convertView;
         if (view == null){
             view = mInflater.inflate(R.layout.item_list_view, parent,false);
@@ -74,7 +78,7 @@ public class ItemsDataAdapter extends BaseAdapter {
         imageBtnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            Log.d("ItemsDataAdapter", "ItemsDataAdapter -> imageDelete -> OnClick");
+            Log.d(LOG_TAG, "ItemsDataAdapter -> imageBtnDelete -> OnClick");
             removeItem(position);
             mExternalFile.removeItemFromFile(itemData);
             }

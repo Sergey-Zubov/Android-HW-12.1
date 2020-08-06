@@ -1,15 +1,14 @@
 <resources>
     <string name="app_name">Android-HW-12.1</string>
-    <string name="main_activity_name">External storage</string>
-    <string name="btn_delete">Delete</string>
-    <string name="text_view_title">Hello</string>
-    <string name="text_view_subtitle">It\'s me</string>
+    <string name="main_activity_name">Внешнее хранилище</string>
+    <string name="text_view_title">Привет,</string>
+    <string name="text_view_subtitle">Это я!</string>
     <string name="toast_title">Title: </string>
     <string name="toast_subtitle">Subtitle: </string>
     <string name="delete_description">Delete</string>
     <string name="some_icon">Some icon</string>
     <string name="toast_app_need_write_permission">
         Для дальнейшей работы приложению необходимо разрешение
-        на запись во внешнее хранилище данных!</string>
-    <string name="external_storage_not_available">Внешнее хранилище не доступно!</string>
+        на запись во внешнее хранилище!</string>
+    <string name="external_storage_not_available">Внешнее хранилище недоступно!</string>
 </resources>
