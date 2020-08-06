@@ -9,14 +9,11 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,9 +22,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Random mRandom = new Random();
     private ItemsDataAdapter mAdapter;
+    private ExternalFile mExternalFile = null;
     private List<Drawable> mImages = new ArrayList<>();
-    private static final String LOG_TAG = "My app";
-    private File mListSamples;
     public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
 
     @Override
@@ -48,56 +44,26 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
         }
-        /*    mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
-            //externalFile.addDirectory();
-            *//*if (!mActivity.getApplicationContext().
-                    getExternalFilesDir(null).getPath().contains("Items.txt")) {
-                Log.e(LOG_TAG,"Directory not created");
-                addDirectory();
-            }*//*
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_CODE_PERMISSION_WRITE_STORAGE);
-
-        }*/
-
-        /*int permissionStatus = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            if (!Objects.requireNonNull(getApplicationContext().getExternalFilesDir(null)).getPath().contains("Items.txt")) {
-                Log.e(LOG_TAG,"Directory not created");
-                addDirectory();
-            }
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_CODE_PERMISSION_WRITE_STORAGE);
-
-        }*/
 
         FloatingActionButton mFab = findViewById(R.id.fab);
 
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAdapter.addItem(generateRandomData(), mListSamples);
+                int indexOfImage = mRandom.nextInt(mImages.size());
+                ItemData itemData = generateRandomData(indexOfImage);
+                mAdapter.addItem(itemData);
+                mExternalFile.saveItemsToFile(itemData, indexOfImage);
             }
         });
 
         ListView mListView = findViewById(R.id.listView);
-        try {
-            File fileDir = new File(this.getExternalFilesDir(null), "Items.txt");
-            if (fileDir.exists() && fileDir.getAbsolutePath().contains("Items.txt")) {
-                mAdapter = new ItemsDataAdapter(this, ExternalFile.loadItemsFromFile(mImages, mListSamples));
-            } else {
-                mAdapter = new ItemsDataAdapter(this, null);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        mExternalFile = new ExternalFile(MainActivity.this, "Items.txt");
+        mAdapter = new ItemsDataAdapter(this, null, mExternalFile);
 
         mListView.setAdapter(mAdapter);
+
+        loadItems();
 
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -112,9 +78,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSION_WRITE_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
-            } else {
+            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, R.string.toast_app_need_write_permission,
                         Toast.LENGTH_LONG).show();
                 finish();
@@ -122,95 +86,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /*private void addDirectory() {
-        if (isExternalStorageWritable()) {
-            mListSamples = new File(getApplicationContext().getExternalFilesDir(null), "Items.txt");
-        } else {
-            Log.e(LOG_TAG, "External storage not available");
-            Toast.makeText(this, R.string.external_storage_not_available, Toast.LENGTH_LONG).show();
-        }
-    }*/
-
-    /*public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }*/
-
-    private ItemData generateRandomData() {
-
-        ItemData itemData = new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
-                getString(R.string.text_view_title) + mAdapter.getCount(),
-                getString(R.string.text_view_subtitle));
-        //ExternalFile.saveItemsToFile(itemData, mListSamples);
-        return itemData;
-
-        /*FileWriter mItemWriter = null;
-
-        try {
-            mItemWriter = new FileWriter(mListSamples, true);
-            mItemWriter.append(mRandom.nextInt(mImages.size()) + "," +
-                            getString(R.string.text_view_title) + mAdapter.getCount() + "," +
-                            getString(R.string.text_view_subtitle) + ";");
-            *//*ItemData itemData = new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
-                    getString(R.string.text_view_title) + mAdapter.getCount(),
-                    getString(R.string.text_view_subtitle));
-            mAdapter.addItem(itemData);
-            mItemWriter = new FileWriter(mListSamples, true);
-            mItemWriter.append(itemData.getImage()).append(",").
-                    append(itemData.getTitle()).append(String.valueOf(mAdapter.getCount())).
-                    append(",").append(itemData.getSubtitle()).append(";");*//*
-            *//*mItemWriter.append(mAdapter.addItem(new ItemData(mImages.get(mRandom.nextInt(mImages.size())),
-                    getString(R.string.text_view_title) + mAdapter.getCount(),
-                    getString(R.string.text_view_subtitle))));*//*
-            *//*mItemWriter.append(String.valueOf(mRandom.nextInt(mImages.size()))).
-                    append(",").append(getString(R.string.text_view_title)).
-                    append(String.valueOf(mAdapter.getCount())).append(",").
-                    append(getString(R.string.text_view_subtitle)).append(";");*//*
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                mItemWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void loadItems() {
+        List<String> list = mExternalFile.loadItemsFromFile();
+        if (list != null) {
+            for (String item : list) {
+                String[] strings = item.split(",");
+                mAdapter.addItem(new ItemData(mImages.get(Integer.parseInt(strings[0])), strings[1], strings[2]));
             }
-        }*/
+        }
     }
 
-    /*private void readItemsList() {
-        FileReader mItemReader = null;
-
-        if (mListSamples != null && mListSamples.length() > 0) {
-            try {
-                mItemReader = new FileReader(mListSamples);
-                String[] items = mItemReader.toString().split(";");
-                for (String item : items) {
-                    String[] strings = item.split(",");
-                    mAdapter.addItem(new ItemData(mImages.get(Integer.parseInt(strings[0])), strings[1], strings[2]));
-
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    assert mItemReader != null;
-                    mItemReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }*/
-
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+    private ItemData generateRandomData(int index) {
+        return new ItemData(mImages.get(index),
+                getString(R.string.text_view_title) + mAdapter.getCount(),
+                getString(R.string.text_view_subtitle));
     }
 
     private void showItemData(int position) {
