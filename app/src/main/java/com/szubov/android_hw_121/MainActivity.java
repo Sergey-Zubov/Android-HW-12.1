@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private ItemsDataAdapter mAdapter;
     private ExternalFile mExternalFile = null;
     private List<Drawable> mImages = new ArrayList<>();
-    public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
+    //public static final int REQUEST_CODE_PERMISSION_WRITE_STORAGE = 12;
     private static final String LOG_TAG = "My app";
 
     @Override
@@ -38,14 +38,14 @@ public class MainActivity extends AppCompatActivity {
 
         fillImages();
 
-        int permissionStatus = ContextCompat.checkSelfPermission(this,
+        /*int permissionStatus = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSION_WRITE_STORAGE);
-        }
+        }*/
 
         ListView mListView = findViewById(R.id.listView);
         mExternalFile = new ExternalFile(MainActivity.this, "Items.txt");
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d(LOG_TAG, "MainActivity -> onRequestPermissionsResults");
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }
-    }
+    }*/
 
     private void loadItems() {
         Log.d(LOG_TAG, "MainActivity -> loadItems");
